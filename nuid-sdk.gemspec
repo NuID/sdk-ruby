@@ -1,4 +1,4 @@
-require_relative 'lib/nuid/sdk/version'
+require_relative "lib/nuid/sdk/version"
 
 Gem::Specification.new do |spec|
   spec.name          = "nuid-sdk"
@@ -17,7 +17,7 @@ Gem::Specification.new do |spec|
   spec.metadata["source_code_uri"] = "https://github.com/NuID/sdk-ruby"
   spec.metadata["changelog_uri"] = "https://github.com/NuID/sdk-ruby/blob/master/CHANGELOG.md"
 
-  spec.add_dependency "httpclient", "~> 2.8.3"
+  spec.add_dependency "httparty", "~> 0.18.1"
 
   # Specify which files should be added to the gem when it is released.
   # The `git ls-files -z` loads the files in the RubyGem that have been added into git.
