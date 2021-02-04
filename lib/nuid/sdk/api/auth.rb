@@ -3,7 +3,6 @@ require "httparty"
 module NuID::SDK::API
   class Auth
     include HTTParty
-    # format :json
     base_uri "https://auth.nuid.io"
 
     attr_reader :api_key
@@ -40,7 +39,7 @@ module NuID::SDK::API
     def _post(path, body)
       self.class.post(path, {
         headers: {"Content-Type" => "application/json"},
-        body: body
+        body: body.to_json
       })
     end
     

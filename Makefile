@@ -6,9 +6,6 @@ build:
 
 clean: stop rm rmi
 
-console:
-	docker exec -it $(container) /bin/sh
-
 rm:
 	docker rm $(container)
 
@@ -17,6 +14,9 @@ rmi:
 
 run:
 	docker run -v $$PWD:/nuid/sdk-ruby -it -d --env-file .env --name $(container) $(image) /bin/sh
+
+shell:
+	docker exec -it $(container) /bin/sh
 
 stop:
 	docker stop $(container)
