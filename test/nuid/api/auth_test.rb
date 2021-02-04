@@ -43,7 +43,7 @@ class NuID::SDK::API::AuthTest < Minitest::Test
   end
 
   def zk(command, *args)
-    cmd = "nuid-pg #{command} '#{args.to_json}'"
+    cmd = "nuid-cli zk #{command} '#{args.to_json}'"
     res = %x{#{cmd}}
     if $? == 0
       JSON.parse(res)

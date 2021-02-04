@@ -1,0 +1,11 @@
+{
+  "name": "sdk-ruby",
+  "description": "Not an NPM Package",
+  "homepage": "https://portal.nuid.io/docs",
+  "version": "1.0.0",
+  "license": "MIT",
+  "repository": "https://github.com/NuID/sdk-ruby",
+  "devDependencies": {
+    "@nuid/cli": "^0.1.0"
+  }
+}

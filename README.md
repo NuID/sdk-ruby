@@ -29,7 +29,8 @@ gem "nuid-sdk", "~> 0.1.0"
 
 Example rails auth controller.
 
-For a more detailed example visit the [Integrating with NuID](https://portal.nuid.io/docs/guides/integrating-with-nuid) guide and its
+For a more detailed example visit the [Integrating with
+NuID](https://portal.nuid.io/docs/guides/integrating-with-nuid) guide and its
 accompanying repository
 [node-example](https://github.com/NuID/node-example/tree/bj/client-server-apps).
 A ruby-specific code example is coming soon.
@@ -56,15 +57,23 @@ end
 
 ## Development
 
-You'll need to download docker to run tests, as we depend on the `nuid/proving-ground`
-docker image to provide a zk binary you can shell out to in the tests.
-After checking out the repo, run `bin/setup` to install dependencies and create
-the docker environment. Then, run `make test` to run the tests inside the running
-container. You can also run `bin/console` for an interactive prompt that will allow you to experiment, but you'll probably want to run that in the container (use `make shell` to get a prompt in the container).
+You'll want to download docker to run the tests, as we depend on the
+`@nuid/cli` npm package to provide a CLI you can shell out to
+in the tests for generating zk crypto. After checking out the repo, run
+`bin/setup` to install dependencies and create the docker environment. Then, run
+`make test` to run the tests inside the running container. You can also run
+`bin/console` for an interactive prompt that will allow you to experiment, but
+you'll probably want to run that in the container (use `make shell` to get a
+prompt in the container).
 
-`make clean` will stop and destroy the container and image. `make build run` will rebuild the image and run the container.
+`make clean` will stop and destroy the container and image. `make build run`
+will rebuild the image and run the container.
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+To install this gem onto your local machine, run `bundle exec rake install`. To
+release a new version, update the version number in `version.rb`, and then run
+`bundle exec rake release`, which will create a git tag for the version, push
+git commits and tags, and push the `.gem` file to
+[rubygems.org](https://rubygems.org).
 
 ## Contributing
 
