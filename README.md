@@ -30,9 +30,8 @@ gem "nuid-sdk", "~> 0.1.0"
 Example rails auth controller.
 
 For a more detailed example visit the [Integrating with
-NuID](https://portal.nuid.io/docs/guides/integrating-with-nuid) guide and its
-accompanying repository
-[node-example](https://github.com/NuID/node-example/tree/bj/client-server-apps).
+NuID](https://portal.nuid.io/docs/guides/integrating-with-nuid) guide and the
+accompanying [examples repo](https://github.com/NuID/examples).
 A ruby-specific code example is coming soon.
 
 ```ruby
