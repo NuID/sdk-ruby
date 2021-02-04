@@ -5,8 +5,8 @@
 This repo provides a Ruby Gem for interacting with NuID APIs within Ruby
 applications.
 
-Read the latest [package
-docs](http://libdocs.s3-website-us-east-1.amazonaws.com/sdk-ruby/v0.1.0/) or
+Read the latest [gem
+docs](https://rubydoc.info/gems/nuid-sdk/) or
 checkout the [platform docs](https://portal.nuid.io/docs) for API docs, guides,
 video tutorials, and more.
 
