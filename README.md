@@ -2,6 +2,10 @@
 
 # NuID SDK for Ruby
 
+[![](https://img.shields.io/gem/v/nuid-sdk?color=red&logo=rubygems&style=for-the-badge)](https://rubygems.org/gems/nuid-sdk)
+[![](https://img.shields.io/badge/docs-v0.1.0-blue?style=for-the-badge&logo=read-the-docs)](https://rubydoc.info/gems/nuid-sdk)
+[![](https://img.shields.io/badge/docs-platform-purple?style=for-the-badge&logo=read-the-docs)](https://portal.nuid.io/docs)
+
 This repo provides a Ruby Gem for interacting with NuID APIs within Ruby
 applications.
 
