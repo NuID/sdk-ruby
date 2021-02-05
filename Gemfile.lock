@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    nuid-sdk (0.1.0)
+    nuid-sdk (0.1.1)
       httparty (~> 0.18.1)
 
 GEM
@@ -16,6 +16,7 @@ GEM
     minitest (5.14.3)
     multi_xml (0.6.0)
     rake (12.3.3)
+    yard (0.9.26)
 
 PLATFORMS
   ruby
@@ -24,6 +25,7 @@ DEPENDENCIES
   minitest (~> 5.0)
   nuid-sdk!
   rake (~> 12.0)
+  yard (~> 0.9)
 
 BUNDLED WITH
    2.1.4

@@ -17,11 +17,14 @@ class NuID::SDK::API::AuthTest < Minitest::Test
     assert_equal(201, res.code)
     nuid = res.parsed_response['nu/id']
     credential = res.parsed_response['nuid/credential']
+    refute_nil(nuid)
+    refute_nil(credential)
 
     # Credential Get
     res = @api.credential_get(nuid)
     assert_equal(200, res.code)
-    refute_nil(res.parsed_response)
+    credential = res.parsed_response['nuid/credential']
+    refute_nil(credential)
 
     # Challenge Get
     res = @api.challenge_get(credential)
