@@ -6,11 +6,9 @@ module NuID::SDK::API
   # existing authentication flows.
   #
   # @example User Registration
-  #   require "nuid-sdk"
-  #   
   #   class UsersController < ApplicationController
   #     NUID_API = ::NuID::SDK::API::Auth.new(ENV["NUID_API_KEY"])
-  #
+  #   
   #     # The registration form should send the verified credential to be
   #     # recorded in the NuID Auth API. The response to that interaction
   #     # will provide a `nu/id` key in the response which should be stored
@@ -20,22 +18,25 @@ module NuID::SDK::API
   #     # using `Zk.verifiableFromSecret(password)` from the `@nuid/zk` npm
   #     # package.
   #     def register
-  #       credential_res = NUID_API.credential_create(params[:verified_credential])
-  #       return render(status: :unauthorized) unless credential_res.ok?
-  #       if credential_res.ok?
-  #         user_params = params.require(:email, :first_name, :last_name)
-  #                             .merge({nuid: credential_res.parsed_response["nu/id"]})
-  #         @current_user = User.create(user_params)
-  #         render json: @current_user, status: :created
-  #       else
-  #         render status: :bad_request
+  #       credential_res = nuid_api.credential_create(params[:credential])
+  #       unless credential_res.code == 201
+  #         return render_error("Unable to create the credential", :bad_request)
   #       end
+  #   
+  #       user = User.create!({
+  #         email: params[:email].strip.downcase,
+  #         first_name: params[:firstName],
+  #         last_name: params[:lastName],
+  #         nuid: credential_res.parsed_response["nu/id"]
+  #       })
+  #   
+  #       render(json: { user: user }, status: :created)
+  #     rescue => exception
+  #       render_error(exception.message, 500)
   #     end
   #   end
   #
   # @example User Login
-  #   require "nuid-sdk"
-  #   
   #   class SessionsController < ApplicationController
   #     NUID_API = ::NuID::SDK::API::Auth.new(ENV["NUID_API_KEY"])
   #   
@@ -44,20 +45,26 @@ module NuID::SDK::API
   #     # challenge has been fetched, return it to the client so a proof
   #     # can be generated from the challenge claims and the user's password.
   #     def login_challenge
-  #       user = User.find(email: params[:email])
-  #       return render(status: :unauthorized) unless user
-  #       
-  #       credential_res = NUID_API.credential_get(user.nuid)
-  #       return render(status: :unauthorized) unless credential_res.ok?
-  #
+  #       user = User.where(email: params[:email].strip.downcase).first
+  #       return render_error("User not found", :unauthorized) unless user
+  #   
+  #       credential_res = nuid_api.credential_get(user.nuid)
+  #       unless credential_res.code == 200
+  #         return render_error("Credential not found", :unauthorized)
+  #       end
+  #   
   #       credential = credential_res.parsed_response["nuid/credential"]
-  #       challenge_res = NUID_API.challenge_get(credential)
-  #       return render(status: :unauthorized) unless credential_res.ok?
-  #
+  #       challenge_res = nuid_api.challenge_get(credential)
+  #       unless challenge_res.code == 201
+  #         return render_error("Cannot create a challenge", 500)
+  #       end
+  #   
   #       challenge_jwt = challenge_res.parsed_response["nuid.credential.challenge/jwt"]
-  #       render json: {challenge_jwt: challenge_jwt}
+  #       render(json: { challengeJwt: challenge_jwt }, status: :ok)
+  #     rescue => exception
+  #       render_error(exception.message, 500)
   #     end
-  #
+  #   
   #     # Verify is the second part of the login process. The params
   #     # provided here include the user identification param (email or
   #     # username), the unaltered challenge_jwt retrieved in phase 1 of login
@@ -68,20 +75,19 @@ module NuID::SDK::API
   #     # `Zk.proofFromSecretAndChallenge(password, challenge_jwt)` from the
   #     # `@nuid/zk` npm package.
   #     def login_verify
-  #       user = User.find(email: params[:email])
-  #       return render(status: :unauthorized) unless user
-  #
-  #       verify_res = NUID_API.challenge_verify(params[:challenge_jwt], params[:proof])
-  #       if res.ok?
-  #         @current_user = user
-  #         # issue session ...
-  #         render(json: @current_user)
-  #       else
-  #         render(status: :unathorized)
+  #       user = User.where(email: params[:email].strip.downcase).first
+  #       return render_error("User not found", :unauthorized) unless user
+  #   
+  #       challenge_res = nuid_api.challenge_verify(params[:challengeJwt], params[:proof])
+  #       unless challenge_res.code == 200
+  #         return render_error("Verification failed", :unauthorized)
   #       end
+  #   
+  #       render(json: { user: user }, status: :ok)
+  #     rescue => exception
+  #       render_error(exception.message, 500)
   #     end
   #   end
-  #
   #
   # @see https://www.npmjs.com/package/@nuid/zk
   # @see https://www.npmjs.com/package/@nuid/cli

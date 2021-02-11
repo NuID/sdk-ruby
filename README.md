@@ -3,7 +3,7 @@
 # NuID SDK for Ruby
 
 [![](https://img.shields.io/gem/v/nuid-sdk?color=red&logo=rubygems&style=for-the-badge)](https://rubygems.org/gems/nuid-sdk)
-[![](https://img.shields.io/badge/docs-v0.1.0-blue?style=for-the-badge&logo=read-the-docs)](https://rubydoc.info/gems/nuid-sdk)
+[![](https://img.shields.io/badge/docs-v0.2.0-blue?style=for-the-badge&logo=read-the-docs)](https://rubydoc.info/gems/nuid-sdk)
 [![](https://img.shields.io/badge/docs-platform-purple?style=for-the-badge&logo=read-the-docs)](https://portal.nuid.io/docs)
 
 This repo provides a Ruby Gem for interacting with NuID APIs within Ruby
@@ -19,14 +19,14 @@ video tutorials, and more.
 From [rubygems](https://rubygems.org/gems/nuid-sdk):
 
 ```sh
-gem install nuid-sdk -v "0.1.1"
+gem install nuid-sdk -v "0.2.0"
 ```
 
 Or with bundler:
 
 ```ruby
 # Gemfile
-gem "nuid-sdk", "~> 0.1.1"
+gem "nuid-sdk", "~> 0.2"
 ```
 
 ## Usage
@@ -38,9 +38,26 @@ NuID](https://portal.nuid.io/docs/guides/integrating-with-nuid) guide and the
 accompanying [examples repo](https://github.com/NuID/examples).
 A ruby-specific code example is coming soon.
 
-```ruby
-require "nuid-sdk"
+``` ruby
+# config/application.rb
+config.x.nuid.auth_api_key = ENV['NUID_API_KEY']
+```
 
+``` ruby
+require "nuid/sdk/api/auth"
+
+class ApplicationController < ActionController::API
+  def nuid_api
+    @nuid_api ||= ::NuID::SDK::API::Auth.new(Rails.configuration.x.nuid.auth_api_key)
+  end
+
+  def render_error(error, status)
+    render(json: {errors: [error]}, status: status)
+  end
+end
+```
+
+```ruby
 class UsersController < ApplicationController
   NUID_API = ::NuID::SDK::API::Auth.new(ENV["NUID_API_KEY"])
 
@@ -53,22 +70,26 @@ class UsersController < ApplicationController
   # using `Zk.verifiableFromSecret(password)` from the `@nuid/zk` npm
   # package.
   def register
-    credential_res = NUID_API.credential_create(params[:verified_credential])
-    if credential_res.ok?
-      user_params = params.require(:email, :first_name, :last_name)
-                          .merge({nuid: credential_res.parsed_response["nu/id"]})
-      @current_user = User.create(user_params)
-      render json: @current_user, status: :created
-    else
-      render status: :bad_request
+    credential_res = nuid_api.credential_create(params[:credential])
+    unless credential_res.code == 201
+      return render_error("Unable to create the credential", :bad_request)
     end
+
+    user = User.create!({
+      email: params[:email].strip.downcase,
+      first_name: params[:firstName],
+      last_name: params[:lastName],
+      nuid: credential_res.parsed_response["nu/id"]
+    })
+
+    render(json: { user: user }, status: :created)
+  rescue => exception
+    render_error(exception.message, 500)
   end
 end
 ```
 
 ``` ruby
-require "nuid-sdk"
-
 class SessionsController < ApplicationController
   NUID_API = ::NuID::SDK::API::Auth.new(ENV["NUID_API_KEY"])
 
@@ -77,18 +98,24 @@ class SessionsController < ApplicationController
   # challenge has been fetched, return it to the client so a proof
   # can be generated from the challenge claims and the user's password.
   def login_challenge
-    user = User.find(email: params[:email])
-    return render(status: :unauthorized) unless user
-    
-    credential_res = NUID_API.credential_get(user.nuid)
-    return render(status: :unauthorized) unless credential_res.ok?
+    user = User.where(email: params[:email].strip.downcase).first
+    return render_error("User not found", :unauthorized) unless user
+
+    credential_res = nuid_api.credential_get(user.nuid)
+    unless credential_res.code == 200
+      return render_error("Credential not found", :unauthorized)
+    end
 
     credential = credential_res.parsed_response["nuid/credential"]
-    challenge_res = NUID_API.challenge_get(credential)
-    return render(status: :unauthorized) unless credential_res.ok?
+    challenge_res = nuid_api.challenge_get(credential)
+    unless challenge_res.code == 201
+      return render_error("Cannot create a challenge", 500)
+    end
 
     challenge_jwt = challenge_res.parsed_response["nuid.credential.challenge/jwt"]
-    render json: {challenge_jwt: challenge_jwt}
+    render(json: { challengeJwt: challenge_jwt }, status: :ok)
+  rescue => exception
+    render_error(exception.message, 500)
   end
 
   # Verify is the second part of the login process. The params
@@ -101,17 +128,17 @@ class SessionsController < ApplicationController
   # `Zk.proofFromSecretAndChallenge(password, challenge_jwt)` from the
   # `@nuid/zk` npm package.
   def login_verify
-    user = User.find(email: params[:email])
-    return render(status: :unauthorized) unless user
+    user = User.where(email: params[:email].strip.downcase).first
+    return render_error("User not found", :unauthorized) unless user
 
-    verify_res = NUID_API.challenge_verify(params[:challenge_jwt], params[:proof])
-    if res.ok?
-      @current_user = user
-      # issue session ...
-      render(json: @current_user)
-    else
-      render(status: :unathorized)
+    challenge_res = nuid_api.challenge_verify(params[:challengeJwt], params[:proof])
+    unless challenge_res.code == 200
+      return render_error("Verification failed", :unauthorized)
     end
+
+    render(json: { user: user }, status: :ok)
+  rescue => exception
+    render_error(exception.message, 500)
   end
 end
 ```
